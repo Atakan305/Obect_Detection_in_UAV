@@ -17,7 +17,7 @@ cap = cv2.VideoCapture("video.mp4")
 
 
 while True:
-    ret, frame = cap.read()  # eger frameler doğru okunursa, true döndür
+    ret, frame = cap.read()  # return true if the frames are read correctly
     frame = cv2.flip(frame, 1)
 
     frame = cv2.resize(frame,(720,576))
@@ -40,7 +40,7 @@ while True:
     all_frames.append(frame)
     frame_count = frame_count + 1
     
-    labels = ["hedef IHA"]
+    labels = ["target UAV"]
 
     colors = ["0,0,255"]
     colors = [np.array(color.split(",")).astype("int") for color in colors]
@@ -60,9 +60,9 @@ while True:
 
     ############## NON-MAXIMUM SUPPRESSION - OPERATION 1 ###################
 
-    ids_list = []  # en yüksek oranlı değerin id'si
-    boxes_list = []  # kutuların koordinatları
-    confidences_list = []  # en yüksek oranlı değer, lebel yüzdesi
+    ids_list = []  # id of the highest rate value
+    boxes_list = []  # the coordinates of the boxes
+    confidences_list = []  # highest rate value, label percentage
 
     ############################ END OF OPERATION 1 ########################
 
@@ -112,42 +112,41 @@ while True:
                 
                 ############## NON-MAXIMUM SUPPRESSION - OPERATION 2 ###################
 
-                ids_list.append(predicted_id)  # id_list'e, yüksek skorlu, seçilen id'yi ekle
+                ids_list.append(predicted_id)  # Add selected id with high score to id_list
                 confidences_list.append(float(
-                    confidence))  # yüksek skorlu id'yi, predicted_id'nin "değerini", confindences_list'e ekle (yüzde)
+                    confidence))  # add high score id, "value" of predicted_id, to confindences_list (percentage)
                 boxes_list.append([start_x, start_y, int(box_width),
-                                   int(box_height)])  # boxes_list'e başlangç ve genişlik, yükseklik değerlerini ekle
+                                   int(box_height)])  # Add start, width and height values to boxes_list
 
                 ############################ END OF OPERATION 2 ########################
 
     ############## NON-MAXIMUM SUPPRESSION - OPERATION 3 ###################
 
     max_ids = cv2.dnn.NMSBoxes(boxes_list, confidences_list, 0.5, 0.4)
-    # en yüksek id'li, tespit edilen nesnelerin boxes_list'teki boyutları, nesnenin yüzdelerini atıyoruz.
+    # We are throwing the dimensions of the detected objects with the highest id in the boxes_list, the percentage of the object.
 
     for max_id in max_ids:  # max_id,
 
-        max_class_id = max_id[0]  # max_id'nin sıfırıncı indexi,
-        box = boxes_list[max_class_id]  # boundingBox'ların özellikleri
-        # box'ın ilk 3 indexi, srasıyla x başlangıç, y başlangıç,  genişlik, yükseklik değerlerini verir
+        max_class_id = max_id[0]  # zeroth index of max_id,
+        box = boxes_list[max_class_id]  # properties of boundingBoxes
+        # The first 3 indexes of box give x start, y start, width, height values respectively.
         start_x = box[0]
         start_y = box[1]
         box_width = box[2]
         box_height = box[3]
 
-        predicted_id = ids_list[max_class_id]  # nesnenin
+        predicted_id = ids_list[max_class_id]  # id of predicted object
         label = labels[
-            predicted_id]  # seçilen id'nin etiketini, belirttiğimiz label listesinden, predicted_id'nin etiketini alıyoruz
+            predicted_id]  # We get the label of the selected id, the label of the predicted_id from the label list we specified.
         confidence = confidences_list[
-            max_class_id]  # yüksek yüzdeliler arasından, confidences_list'ten, max_class_id olanı seçiyoruz. yani en yüksek yüzdeli olanı
+            max_class_id]  # We choose the max_class_id from the confidences_list among the high percentages. So we choose the one with the highest percentage.
 
         ############################ END OF OPERATION 3 ########################
 
-        end_x = start_x + box_width  # bitiş x koordinatı, başlangıçX ve genişlik değerlerinin toplamı
-        end_y = start_y + box_height  # bitiş y koordinatı, başlangıçY ve yükseklik değerlerinin toplamı
-
-        box_color = colors[predicted_id]  # kutunun rengini, colors listesinden, predicted_id'nin olduğu rengi atıyoruz
-        box_color = [int(each) for each in box_color]  #
+        end_x = start_x + box_width  # sum of end x coordinate, startX and width
+        end_y = start_y + box_height  # sum of end y coordinate, startY and height
+        box_color = colors[predicted_id]  # We discard the color of the box, from the list of colors, the color where the predicted_id is.
+        box_color = [int(each) for each in box_color]  
 
         label = "{}: {:.2f}%".format(label, confidence * 100)
         print("predicted object {}".format(label))
