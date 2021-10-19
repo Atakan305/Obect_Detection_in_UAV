@@ -1,5 +1,3 @@
-# %% 1. Bölüm
-
 import cv2
 import numpy as np
 #from __future__ import print_function
@@ -20,7 +18,7 @@ cap = cv2.VideoCapture(0)
 fps = FPS().start()
 
 while fps._numFrames < args["num_frames"]:
-    grabbed, frame = cap.read()  # eger frameler doğru okunursa, true döndür
+    grabbed, frame = cap.read()  # return true if the frames are read correctly
     frame = cv2.flip(frame, 1)
     frame = imutils.resize(frame, width=400)
     frame_width = frame.shape[1]
@@ -44,7 +42,7 @@ while fps._numFrames < args["num_frames"]:
     colors = np.array(colors)
     colors = np.tile(colors, (18, 1))
 
-    model = cv2.dnn.readNetFromDarknet("C:\\Users\\AtakanDell\\Desktop\\yolov3.cfg","C:\\Users\\AtakanDell\\Desktop\\yolov3.weights")
+    model = cv2.dnn.readNetFromDarknet("path of 'yolov3.weights'")
     model.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
     model.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
 
@@ -57,9 +55,9 @@ while fps._numFrames < args["num_frames"]:
 
     ############## NON-MAXIMUM SUPPRESSION - OPERATION 1 ###################
 
-    ids_list = []  # en yüksek oranlı değerin id'si
-    boxes_list = []  # kutuların koordinatları
-    confidences_list = []  # en yüksek oranlı değer, lebel yüzdesi
+    ids_list = []  # id of the highest rate value
+    boxes_list = []  # the coordinates of the boxes
+    confidences_list = []  # highest rate value, label percentage
 
     ############################ END OF OPERATION 1 ########################
 
@@ -80,24 +78,24 @@ while fps._numFrames < args["num_frames"]:
 
                 ############## NON-MAXIMUM SUPPRESSION - OPERATION 2 ###################
 
-                ids_list.append(predicted_id)  # id_list'e, yüksek skorlu, seçilen id'yi ekle
+                ids_list.append(predicted_id)  # Add selected id with high score to id_list
                 confidences_list.append(float(
-                    confidence))  # yüksek skorlu id'yi, predicted_id'nin "değerini", confindences_list'e ekle (yüzde)
+                    confidence))  # add high score id, "value" of predicted_id, to confindences_list (percentage)
                 boxes_list.append([start_x, start_y, int(box_width),
-                                   int(box_height)])  # boxes_list'e başlangç ve genişlik, yükseklik değerlerini ekle
+                                   int(box_height)])  # Add start and width, height values to boxes_list
 
                 ############################ END OF OPERATION 2 ########################
 
     ############## NON-MAXIMUM SUPPRESSION - OPERATION 3 ###################
 
     max_ids = cv2.dnn.NMSBoxes(boxes_list, confidences_list, 0.5, 0.4)
-    # en yüksek id'li, tespit edilen nesnelerin boxes_list'teki boyutları, nesnenin yüzdelerini atıyoruz.
+    # We are throwing the dimensions of the detected objects with the highest id in the boxes_list, the percentage of the object.
 
     for max_id in max_ids:  # max_id,
 
-        max_class_id = max_id[0]  # max_id'nin sıfırıncı indexi,
-        box = boxes_list[max_class_id]  # boundingBox'ların özellikleri
-        # box'ın ilk 3 indexi, srasıyla x başlangıç, y başlangıç,  genişlik, yükseklik değerlerini verir
+        max_class_id = max_id[0]  # zeroth index of max_id,
+        box = boxes_list[max_class_id]  # properties of boundingBoxes
+        # The first 3 indexes of box give x start, y start, width, height values, respectively.
         start_x = box[0]
         start_y = box[1]
         box_width = box[2]
@@ -105,16 +103,16 @@ while fps._numFrames < args["num_frames"]:
 
         predicted_id = ids_list[max_class_id]  # nesnenin
         label = labels[
-            predicted_id]  # seçilen id'nin etiketini, belirttiğimiz label listesinden, predicted_id'nin etiketini alıyoruz
+            predicted_id]  # We get the label of the selected id, the label of the predicted_id from the label list we specified.
         confidence = confidences_list[
-            max_class_id]  # yüksek yüzdeliler arasından, confidences_list'ten, max_class_id olanı seçiyoruz. yani en yüksek yüzdeli olanı
+            max_class_id]  # Among the high percentages, we choose the one from the confidences_list, which is the max_class_id. So we pick the one with the highest percentage.
 
         ############################ END OF OPERATION 3 ########################
 
-        end_x = start_x + box_width  # bitiş x koordinatı, başlangıçX ve genişlik değerlerinin toplamı
-        end_y = start_y + box_height  # bitiş y koordinatı, başlangıçY ve genişlik değerlerinin toplamı
+        end_x = start_x + box_width  # sum of end x coordinate, startX and width
+        end_y = start_y + box_height  # sum of end y coordinate, startY and width
 
-        box_color = colors[predicted_id]  # kutunun rengini, colors listesinden, predicted_id'nin olduğu rengi atıyoruz
+        box_color = colors[predicted_id]  # We discard the color of the box, the color of the predicted_id from the colors list.
         box_color = [int(each) for each in box_color]  #
 
         label = "{}: {:.2f}%".format(label, confidence * 100)
