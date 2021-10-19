@@ -1,4 +1,3 @@
-# %% 1. Bölüm
 import imutils
 import time
 import cv2
@@ -88,24 +87,24 @@ while True:
                 print(s)
                 
                 font = cv2.FONT_HERSHEY_SIMPLEX 
-                cv2.putText(frame,'TESPIT EDILEN NESNE: IHA', (100,22), font, 0.4, (255,255,255),2,cv2.LINE_AA)
-                cv2.putText(frame,'UCUS MODU: OTONOM', (290,22), font, 0.4, (255,255,255),2,cv2.LINE_AA)
-                cv2.putText(frame,'TAKIP EDILIYOR', (450,22), font, 0.4, (255,255,255),2,cv2.LINE_AA)
+                cv2.putText(frame,'DETECTED OBJECT: UAV', (100,22), font, 0.4, (255,255,255),2,cv2.LINE_AA)
+                cv2.putText(frame,'FLIGHT MODE: AUTONOMOUS', (290,22), font, 0.4, (255,255,255),2,cv2.LINE_AA)
+                cv2.putText(frame,'TRACKING...', (450,22), font, 0.4, (255,255,255),2,cv2.LINE_AA)
                 
                 if box_center_x>=180 and box_center_x<=360 and box_center_y>58 and box_center_y<288:
-                    print("hedef 2.bolgede")
+                    print("target in zone 2")
                     #cv2.rectangle(frame,(160,48),(480,432),(0,0,255),1) 
                     
                 elif box_center_x>360 and box_center_x<540  and box_center_y>58 and box_center_y<288:
-                    print("hedef 1.bolgede")
+                    print("target in zone 1")
                     #cv2.rectangle(frame,(160,48),(480,432),(0,0,255),1) 
                 
                 elif box_center_x>180 and box_center_x<360 and box_center_y>288 and box_center_y<518:
-                    print("hedef 3.bolgede")
+                    print("target in zone 3")
                     #cv2.rectangle(frame,(160,48),(480,432),(0,0,255),1) 
                     
                 elif box_center_x>360 and box_center_x<540 and box_center_y>288 and box_center_y<518:
-                    print("hedef 4. bolgede")
+                    print("target in zone 4")
                     #cv2.rectangle(frame,(160,48),(480,432),(0,0,255),1) 
                     
                     
